@@ -60,7 +60,7 @@
 	<div class="picker">
 		<div class="picker-head">
 			<span>Choose a reaction</span>
-			<button type="button" aria-label="Close reaction picker" onclick={() => (open = false)}>×</button>
+			<button type="button" aria-label="Close reaction picker" onclick={() => (open = false)}>X</button>
 		</div>
 		<div class="emoji-grid">
 			{#each reactionCatalog as reaction (reaction.id)}

@@ -63,7 +63,7 @@ a {
 	align-items: center;
 	justify-content: space-between;
 	gap: 12px;
-	margin-bottom: 54px;
+	margin-bottom: 40px;
 }
 
 .brand {
@@ -88,6 +88,19 @@ a {
 	height: 6px;
 	border-radius: 50%;
 	background: #8eac9a;
+	display: inline-block;
+	animation: live-pulse 3.5s ease-in-out infinite;
+}
+
+@keyframes live-pulse {
+	0%, 100% {
+		background: #9d9f9e;
+		opacity: 0.5;
+	}
+	50% {
+		background: #75dba0;
+		opacity: 1;
+	}
 }
 
 .label {
