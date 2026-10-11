@@ -12,31 +12,20 @@
 
 <main class="app-shell">
 	<header class="topbar">
-		<div class="brand">yoinkit</div>
+		<div class="brand">yoinkit.biz</div>
 		<div class="live-count">{data.state.connectedViewers} connected</div>
 	</header>
 
 	<section>
-		<div class="label">NOW SHOWING</div>
 		<h1 class="title"><span class="title-number">#{data.state.showNumber}</span> — {data.state.showName}</h1>
-		<p class="subtitle">Audience voting is open</p>
-	</section>
-
-	<hr class="rule" />
-
-	<section>
-		<div class="section-top">
-			<span class="label">REACTIONS</span>
-			<span class="tiny">tap to react</span>
-		</div>
 		<ReactionChips />
 	</section>
 
+
 	<hr class="rule" />
 
 	<section>
 		<div class="section-top">
-			<span class="label">LIVE RESULTS</span>
 			<span class="tiny">{data.state.connectedViewers} people watching</span>
 		</div>
 
@@ -63,7 +52,6 @@
 
 	<section>
 		<div class="vote-heading">
-			<span class="label">CAST YOUR VOTE</span>
 			<span class="tiny">{data.state.votesLocked ? 'Votes are final' : 'Votes can be changed'}</span>
 		</div>
 
@@ -75,7 +63,6 @@
 			disabled={!data.state.yoinkAvailable}
 			disabledText="Yoink unlocks later"
 		/>
-		<p class="help-text">Slide each handle all the way to the right. You can vote for both.</p>
 	</section>
 </main>
 

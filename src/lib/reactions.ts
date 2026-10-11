@@ -7,16 +7,13 @@ export type Reaction = {
 
 const emojiNames: Record<string, string> = {
 	'🎃': 'pumpkin',
-	'😟': 'worried face',
 	'💤': 'sleeping',
-	'😅': 'nervous laugh',
 	'❤️': 'heart',
 	'💀': 'skull',
 	'👍': 'thumbs up',
 	'🤡': 'clown',
 	'✨': 'sparkles',
 	'🤔': 'thinking',
-	'😤': 'huffing',
 	'👻': 'ghost',
 	'💪': 'strong',
 	'🥺': 'pleading face',
@@ -52,17 +49,15 @@ const emojiNames: Record<string, string> = {
 };
 
 const emojis = [
+	'👍',
+	'👎',
 	'🎃',
-	'😟',
 	'💤',
-	'😅',
 	'❤️',
 	'💀',
-	'👍',
 	'🤡',
 	'✨',
 	'🤔',
-	'😤',
 	'👻',
 	'💪',
 	'🥺',
@@ -93,8 +88,7 @@ const emojis = [
 	'🇺🇸',
 	'🫠',
 	'🫡',
-	'😭',
-	'👎'
+	'😭'
 ];
 
 export const reactionCatalog: Reaction[] = emojis.map((emoji, index) => ({
