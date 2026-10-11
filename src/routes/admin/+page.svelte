@@ -48,7 +48,6 @@
 		<section class="admin-section">
 			<div class="section-top">
 				<span class="label">ROOM SETTINGS</span>
-				<span class="tiny">used by / and /vote</span>
 			</div>
 
 			<form method="POST" action="?/saveSettings" class="form-stack panel-form">
@@ -115,12 +114,6 @@
 			</form>
 
 			<div class="quick-actions">
-				<form method="POST" action="?/resetVotes">
-					<button class="button danger" type="submit">Reset votes only</button>
-				</form>
-				<form method="POST" action="?/unlockYoink">
-					<button class="button" type="submit">Unlock Yoink early</button>
-				</form>
 				<form method="POST" action="?/logout">
 					<button class="button" type="submit">Log out</button>
 				</form>
