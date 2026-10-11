@@ -1,31 +1,23 @@
 <script lang="ts">
 	import { reactionCatalog } from '#lib/reactions.js';
 
+	type ReactionCount = { id: string; count: number };
+	type Props = {
+		reactions: ReactionCount[];
+		mine: string[];
+		onToggle: (id: string, active: boolean) => void;
+		pendingId?: string;
+	};
+
+	let { reactions, mine, onToggle, pendingId = '' }: Props = $props();
 	let open = $state(false);
-	let selected = $state(new Set(['reaction-15']));
-	let counts = $state<Record<string, number>>({
-		'reaction-6': 1,
-		'reaction-15': 4,
-		'reaction-16': 2,
-		'reaction-26': 1
-	});
 
-	const usedReactions = $derived(reactionCatalog.filter((reaction) => counts[reaction.id] > 0));
+	const countById = $derived(new Map(reactions.map((reaction) => [reaction.id, reaction.count])));
+	const mineSet = $derived(new Set(mine));
+	const usedReactions = $derived(reactionCatalog.filter((reaction) => (countById.get(reaction.id) ?? 0) > 0));
 
-	function toggle(id: string) {
-		const nextSelected = new Set(selected);
-		const nextCounts = { ...counts };
-
-		if (nextSelected.has(id)) {
-			nextSelected.delete(id);
-			nextCounts[id] = Math.max(0, (nextCounts[id] ?? 0) - 1);
-		} else {
-			nextSelected.add(id);
-			nextCounts[id] = (nextCounts[id] ?? 0) + 1;
-		}
-
-		selected = nextSelected;
-		counts = nextCounts;
+	function choose(id: string) {
+		onToggle(id, !mineSet.has(id));
 		open = false;
 	}
 </script>
@@ -34,14 +26,15 @@
 	{#each usedReactions as reaction (reaction.id)}
 		<button
 			type="button"
-			class:selected={selected.has(reaction.id)}
+			class:selected={mineSet.has(reaction.id)}
 			class="chip"
-			aria-pressed={selected.has(reaction.id)}
-			aria-label={`${reaction.name} reaction, ${counts[reaction.id]} selected`}
-			onclick={() => toggle(reaction.id)}
+			disabled={pendingId === reaction.id}
+			aria-pressed={mineSet.has(reaction.id)}
+			aria-label={`${reaction.name} reaction, ${countById.get(reaction.id)} selected`}
+			onclick={() => choose(reaction.id)}
 		>
 			<span class="emoji">{reaction.emoji}</span>
-			<span>{counts[reaction.id]}</span>
+			<span>{countById.get(reaction.id)}</span>
 		</button>
 	{/each}
 
@@ -60,15 +53,16 @@
 	<div class="picker">
 		<div class="picker-head">
 			<span>Choose a reaction</span>
-			<button type="button" aria-label="Close reaction picker" onclick={() => (open = false)}>X</button>
+			<button type="button" aria-label="Close reaction picker" onclick={() => (open = false)}>×</button>
 		</div>
 		<div class="emoji-grid">
 			{#each reactionCatalog as reaction (reaction.id)}
 				<button
 					type="button"
-					class:selected={selected.has(reaction.id)}
+					class:selected={mineSet.has(reaction.id)}
+					disabled={pendingId === reaction.id}
 					aria-label={`React with ${reaction.name}`}
-					onclick={() => toggle(reaction.id)}
+					onclick={() => choose(reaction.id)}
 				>
 					{reaction.emoji}
 				</button>
@@ -108,6 +102,11 @@
 		border-color: var(--selected);
 		background: var(--selected-soft);
 		color: #c6cdf2;
+	}
+
+	.chip:disabled {
+		cursor: wait;
+		opacity: 0.6;
 	}
 
 	.emoji {
@@ -166,6 +165,11 @@
 	.emoji-grid button.selected {
 		border-color: #636d69;
 		background: #303635;
+	}
+
+	.emoji-grid button:disabled {
+		cursor: wait;
+		opacity: 0.5;
 	}
 
 	@media (max-width: 360px) {

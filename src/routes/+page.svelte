@@ -83,7 +83,7 @@
 		margin-top: 0;
 	}
 
-	.rule {
+	:global(.join-page .rule) {
 		width: 100%;
 	}
 

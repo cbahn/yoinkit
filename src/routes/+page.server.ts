@@ -1,11 +1,19 @@
 import { fail, redirect } from '@sveltejs/kit';
-import { isValidAccessCode } from '#lib/server/appState.js';
+import { isValidAccessCode, newViewerId } from '#lib/server/appState.js';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = ({ cookies }) => {
 	const savedCode = cookies.get('yoinkit_code');
 
 	if (isValidAccessCode(savedCode)) {
+		if (!cookies.get('yoinkit_viewer_id')) {
+			cookies.set('yoinkit_viewer_id', newViewerId(), {
+				path: '/',
+				httpOnly: true,
+				sameSite: 'lax',
+				maxAge: 60 * 60 * 24 * 30
+			});
+		}
 		redirect(303, '/vote');
 	}
 
@@ -36,6 +44,15 @@ export const actions: Actions = {
 			sameSite: 'lax',
 			maxAge: 60 * 60 * 12
 		});
+
+		if (!cookies.get('yoinkit_viewer_id')) {
+			cookies.set('yoinkit_viewer_id', newViewerId(), {
+				path: '/',
+				httpOnly: true,
+				sameSite: 'lax',
+				maxAge: 60 * 60 * 24 * 30
+			});
+		}
 
 		redirect(303, '/vote');
 	}

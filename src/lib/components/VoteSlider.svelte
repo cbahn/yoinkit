@@ -3,21 +3,32 @@
 		name: string;
 		theme: 'speed' | 'yoink';
 		locked: boolean;
+		voted: boolean;
+		pending?: boolean;
 		disabled?: boolean;
 		disabledText?: string;
+		onVote: (active: boolean) => void;
 	};
 
-	let { name, theme, locked, disabled = false, disabledText = 'Not available yet' }: Props = $props();
+	let {
+		name,
+		theme,
+		locked,
+		voted,
+		pending = false,
+		disabled = false,
+		disabledText = 'Not available yet',
+		onVote
+	}: Props = $props();
 
 	let track = $state<HTMLDivElement>();
 	let thumb = $state<HTMLButtonElement>();
 	let distance = $state(1);
 	let dragging = $state(false);
-	let voted = $state(false);
 	let percent = $state(0);
 	let pointerId = $state<number | null>(null);
 
-	const canRemove = $derived(voted && !locked);
+	const canRemove = $derived(voted && !locked && !pending);
 	const complete = $derived(voted || percent >= 1);
 
 	function updateDistance() {
@@ -38,7 +49,7 @@
 	}
 
 	function start(event: PointerEvent) {
-		if (disabled || voted) return;
+		if (disabled || voted || pending) return;
 		if (event.button !== 0 && event.pointerType === 'mouse') return;
 
 		event.preventDefault();
@@ -60,8 +71,8 @@
 		pointerId = null;
 
 		if (submit && percent >= 0.86) {
-			voted = true;
-			percent = 1;
+			percent = 0;
+			onVote(true);
 		} else {
 			percent = 0;
 		}
@@ -70,18 +81,13 @@
 			thumb.releasePointerCapture(event.pointerId);
 		}
 	}
-
-	function removeVote() {
-		voted = false;
-		percent = 0;
-	}
 </script>
 
 <div class="vote-block {theme}">
 	<div class="vote-caption">
 		<strong>{name}</strong>
 		{#if canRemove}
-			<button type="button" class="withdraw" onclick={removeVote}>Remove vote</button>
+			<button type="button" class="withdraw" onclick={() => onVote(false)}>Remove vote</button>
 		{/if}
 	</div>
 
@@ -93,14 +99,16 @@
 			class:dragging
 			class:complete
 			class="slider"
+			aria-busy={pending}
 			style={`--p: ${complete ? 1 : percent}; --dx: ${complete ? distance : distance * percent}px`}
 		>
 			<div class="fill"></div>
-			<span class="slide-text">{voted ? 'Vote recorded' : 'Slide to vote →'}</span>
+			<span class="slide-text">{pending ? 'Recording…' : voted ? 'Vote recorded' : 'Slide to vote →'}</span>
 			<button
 				bind:this={thumb}
 				type="button"
 				class="thumb"
+				disabled={pending || voted}
 				role="slider"
 				aria-label={`Slide to vote ${name}`}
 				aria-valuemin="0"
@@ -205,6 +213,10 @@
 		transform: translateX(var(--dx));
 		transition: transform 0.23s ease;
 		touch-action: none;
+	}
+
+	.thumb:disabled {
+		cursor: default;
 	}
 
 	.dragging .thumb,

@@ -1,5 +1,12 @@
 import { fail } from '@sveltejs/kit';
-import { demoState, isValidAdminPassword } from '#lib/server/appState.js';
+import {
+	bumpRevision,
+	demoState,
+	isValidAdminPassword,
+	resetVotes,
+	snapshot,
+	startShow
+} from '#lib/server/appState.js';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = ({ cookies }) => {
@@ -12,7 +19,7 @@ export const load: PageServerLoad = ({ cookies }) => {
 
 	return {
 		authed,
-		state: demoState
+		state: snapshot('admin')
 	};
 };
 
@@ -56,10 +63,11 @@ export const actions: Actions = {
 		}
 
 		demoState.accessCode = accessCode;
-		demoState.showName = showName || 'Untitled Show';
+		demoState.showName = showName;
 		demoState.votesLocked = form.get('votesLocked') === 'on';
 		demoState.yoinkDelayMinutes = Math.max(0, yoinkDelayMinutes || 0);
 		demoState.yoinkAvailable = demoState.yoinkDelayMinutes === 0 || form.get('yoinkAvailable') === 'on';
+		bumpRevision();
 
 		return { message: 'Settings saved for this local demo.' };
 	},
@@ -71,13 +79,11 @@ export const actions: Actions = {
 
 		const form = await request.formData();
 		const showName = String(form.get('showName') ?? '').trim();
-		demoState.showNumber += 1;
-		demoState.showName = showName || 'Untitled Show';
-		demoState.speedVotes = 0;
-		demoState.yoinkVotes = 0;
-		demoState.votesLocked = form.get('votesLocked') === 'on';
-		demoState.yoinkDelayMinutes = Math.max(0, Number(form.get('yoinkDelayMinutes') ?? 0) || 0);
-		demoState.yoinkAvailable = demoState.yoinkDelayMinutes === 0;
+		startShow(
+			showName,
+			form.get('votesLocked') === 'on',
+			Math.max(0, Number(form.get('yoinkDelayMinutes') ?? 0) || 0)
+		);
 
 		return { message: `Started show #${demoState.showNumber}.` };
 	},
@@ -87,9 +93,7 @@ export const actions: Actions = {
 			return fail(401, { message: 'Please log in again.' });
 		}
 
-		demoState.speedVotes = 0;
-		demoState.yoinkVotes = 0;
-		demoState.votesLocked = false;
+		resetVotes();
 
 		return { message: 'Votes reset. Vote changes are now allowed.' };
 	},
@@ -100,6 +104,7 @@ export const actions: Actions = {
 		}
 
 		demoState.yoinkAvailable = true;
+		bumpRevision();
 		return { message: 'Yoink is available now.' };
 	}
 };
